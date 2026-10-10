@@ -1,0 +1,522 @@
+<div class="min-h-screen bg-gray-100">
+
+  <!-- HEADER -->
+
+  <div
+    class="bg-blue-600 text-white
+           px-8 py-5
+           flex justify-between
+           items-center"
+  >
+
+    <h1 class="text-2xl font-bold">
+      DocuVault
+    </h1>
+
+    <div class="flex gap-3">
+
+      <a
+        href="/documents"
+        class="bg-white
+               text-blue-600
+               px-5 py-2
+               rounded-lg"
+      >
+        Documents
+      </a>
+
+      <a
+        href="/dashboard"
+        class="bg-white
+               text-blue-600
+               px-5 py-2
+               rounded-lg"
+      >
+        Dashboard
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- MAIN -->
+
+  <main class="p-8">
+
+    <!-- TITLE -->
+
+    <div class="mb-8">
+
+      <h2
+        class="text-3xl
+               font-bold
+               text-gray-800"
+      >
+        Categories
+      </h2>
+
+      <p class="text-gray-500 mt-2">
+        Create and manage
+        document categories
+      </p>
+
+    </div>
+
+
+    <!-- CREATE / EDIT CATEGORY -->
+
+    @if (canManageCategories) {
+
+    <div
+      class="bg-white
+               rounded-xl
+               shadow
+               p-6
+               mb-8"
+    >
+
+      <!-- FORM TITLE -->
+
+      @if (editing) {
+
+      <h3
+        class="text-2xl
+                   font-bold
+                   text-gray-800
+                   mb-6"
+      >
+        Edit Category
+      </h3>
+
+      } @else {
+
+      <h3
+        class="text-2xl
+                   font-bold
+                   text-gray-800
+                   mb-6"
+      >
+        Create Category
+      </h3>
+
+      }
+
+
+      <!-- CATEGORY NAME -->
+
+      <div class="mb-5">
+
+        <label
+          class="block
+                   font-medium
+                   text-gray-700
+                   mb-2"
+        >
+          Category Name
+        </label>
+
+        <input
+          type="text"
+          [(ngModel)]="name"
+          placeholder="Enter category name"
+          class="w-full
+                   border
+                   border-gray-300
+                   rounded-lg
+                   px-4 py-3
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-blue-500"
+        />
+
+      </div>
+
+
+      <!-- DESCRIPTION -->
+
+      <div class="mb-5">
+
+        <label
+          class="block
+                   font-medium
+                   text-gray-700
+                   mb-2"
+        >
+          Description
+        </label>
+
+        <textarea
+          [(ngModel)]="description"
+          placeholder="Enter category description"
+          rows="3"
+          class="w-full
+                   border
+                   border-gray-300
+                   rounded-lg
+                   px-4 py-3
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-blue-500"
+        ></textarea>
+
+      </div>
+
+
+      <!-- BUTTONS -->
+
+      <div class="flex gap-3">
+
+        @if (!editing) {
+
+        <button
+          type="button"
+          (click)="createCategory()"
+          [disabled]="saving"
+          class="bg-blue-600
+                     hover:bg-blue-700
+                     text-white
+                     px-6 py-3
+                     rounded-lg
+                     font-medium"
+        >
+
+          @if (saving) {
+
+          Creating...
+
+          } @else {
+
+          Create Category
+
+          }
+
+        </button>
+
+        }
+
+
+        @if (editing) {
+
+        <button
+          type="button"
+          (click)="updateCategory()"
+          [disabled]="saving"
+          class="bg-green-600
+                     hover:bg-green-700
+                     text-white
+                     px-6 py-3
+                     rounded-lg
+                     font-medium"
+        >
+
+          @if (saving) {
+
+          Updating...
+
+          } @else {
+
+          Update Category
+
+          }
+
+        </button>
+
+
+        <button
+          type="button"
+          (click)="cancelEdit()"
+          class="bg-gray-500
+                     hover:bg-gray-600
+                     text-white
+                     px-6 py-3
+                     rounded-lg
+                     font-medium"
+        >
+          Cancel
+        </button>
+
+        }
+
+      </div>
+
+
+      <!-- SUCCESS -->
+
+      @if (message) {
+
+      <p
+        class="text-green-600
+                   mt-4
+                   font-medium"
+      >
+        {{ message }}
+      </p>
+
+      }
+
+
+      <!-- ERROR -->
+
+      @if (error) {
+
+      <p
+        class="text-red-600
+                   mt-4
+                   font-medium"
+      >
+        {{ error }}
+      </p>
+
+      }
+
+    </div>
+
+    }
+
+
+    <!-- CATEGORY COUNT -->
+
+    <div
+      class="flex
+             justify-between
+             items-center
+             mb-4"
+    >
+
+      <h3
+        class="text-2xl
+               font-bold
+               text-gray-800"
+      >
+        All Categories
+      </h3>
+
+      <span class="text-gray-500">
+
+        {{ categories.length }}
+
+        categories
+
+      </span>
+
+    </div>
+
+
+    <!-- LOADING -->
+
+    @if (loading) {
+
+    <div
+      class="bg-white
+               rounded-xl
+               shadow
+               p-6"
+    >
+      Loading categories...
+    </div>
+
+    }
+
+
+    <!-- ERROR -->
+
+    @if (!loading && error) {
+
+    <div
+      class="bg-red-100
+               text-red-700
+               rounded-lg
+               p-4
+               mb-4"
+    >
+      {{ error }}
+    </div>
+
+    }
+
+
+    <!-- CATEGORY LIST -->
+
+    @if (!loading) {
+
+    @if (categories.length === 0) {
+
+    <div
+      class="bg-white
+                 rounded-xl
+                 shadow
+                 p-8
+                 text-center"
+    >
+
+      <h3
+        class="text-xl
+                   font-semibold"
+      >
+        No Categories
+      </h3>
+
+      <p class="text-gray-500 mt-2">
+        No categories available.
+      </p>
+
+    </div>
+
+    } @else {
+
+    <div
+      class="bg-white
+                 rounded-xl
+                 shadow
+                 overflow-hidden"
+    >
+
+      <table class="w-full">
+
+        <!-- TABLE HEADER -->
+
+        <thead
+          class="bg-gray-200"
+        >
+
+        <tr>
+
+          <th
+            class="p-4
+                         text-left"
+          >
+            ID
+          </th>
+
+          <th
+            class="p-4
+                         text-left"
+          >
+            Name
+          </th>
+
+          <th
+            class="p-4
+                         text-left"
+          >
+            Description
+          </th>
+
+          @if (canManageCategories) {
+
+          <th
+            class="p-4
+                           text-left"
+          >
+            Action
+          </th>
+
+          }
+
+        </tr>
+
+        </thead>
+
+
+        <!-- TABLE BODY -->
+
+        <tbody>
+
+        @for (
+        category of categories;
+        track category.id
+        ) {
+
+        <tr
+          class="border-t
+                         hover:bg-gray-50"
+        >
+
+          <!-- ID -->
+
+          <td class="p-4">
+
+            {{ category.id }}
+
+          </td>
+
+
+          <!-- NAME -->
+
+          <td
+            class="p-4
+                           font-semibold"
+          >
+
+            {{ category.name }}
+
+          </td>
+
+
+          <!-- DESCRIPTION -->
+
+          <td class="p-4">
+
+            {{ category.description }}
+
+          </td>
+
+
+          <!-- ACTION -->
+
+          @if (canManageCategories) {
+
+          <td class="p-4">
+
+            <!-- EDIT -->
+
+            <button
+              type="button"
+              (click)="editCategory(category)"
+              class="bg-blue-600
+                               hover:bg-blue-700
+                               text-white
+                               px-4 py-2
+                               rounded-lg
+                               mr-2"
+            >
+              Edit
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button
+              type="button"
+              (click)="deleteCategory(category.id)"
+              class="bg-red-600
+                               hover:bg-red-700
+                               text-white
+                               px-4 py-2
+                               rounded-lg"
+            >
+              Delete
+            </button>
+
+          </td>
+
+          }
+
+        </tr>
+
+        }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    }
+
+    }
+
+  </main>
+
+</div>

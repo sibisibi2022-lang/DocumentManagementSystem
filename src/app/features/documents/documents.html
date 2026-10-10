@@ -1,0 +1,903 @@
+<div class="min-h-screen bg-gray-100">
+
+  <header
+    class="bg-slate-900 text-white px-8 py-5 flex items-center justify-between">
+
+    <div>
+
+      <h1 class="text-2xl font-bold">
+        DocuVault
+      </h1>
+
+      <p class="text-sm text-gray-300">
+        Document Management
+      </p>
+
+    </div>
+
+    <div class="flex gap-3">
+
+      <button
+        type="button"
+        (click)="goToDashboard()"
+        class="bg-white text-slate-900 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">
+
+        Dashboard
+
+      </button>
+
+      @if (canEditDocuments) {
+
+      <button
+        type="button"
+        (click)="goToCategories()"
+        class="bg-white text-slate-900 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">
+
+        Categories
+
+      </button>
+
+      }
+
+    </div>
+
+  </header>
+
+
+  <main
+    class="max-w-7xl mx-auto p-8">
+
+
+    <!-- Common notification -->
+
+    @if (notificationMessage) {
+
+    @if (notificationType === 'success') {
+
+    <div
+      class="mb-6 p-4 bg-green-100 border border-green-300 text-green-800 rounded-lg flex items-center gap-3">
+
+          <span class="text-xl">
+            ✅
+          </span>
+
+      <span class="font-semibold">
+            {{ notificationMessage }}
+          </span>
+
+    </div>
+
+    }
+
+    @if (notificationType === 'warning') {
+
+    <div
+      class="mb-6 p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg flex items-center gap-3">
+
+          <span class="text-xl">
+            ⚠️
+          </span>
+
+      <span class="font-semibold">
+            {{ notificationMessage }}
+          </span>
+
+    </div>
+
+    }
+
+    @if (notificationType === 'error') {
+
+    <div
+      class="mb-6 p-4 bg-red-100 border border-red-300 text-red-800 rounded-lg flex items-center gap-3">
+
+          <span class="text-xl">
+            ❌
+          </span>
+
+      <span class="font-semibold">
+            {{ notificationMessage }}
+          </span>
+
+    </div>
+
+    }
+
+    }
+
+
+    <!-- Upload Document -->
+
+    <div
+      class="bg-white rounded-xl shadow p-6 mb-6">
+
+      <h2
+        class="text-xl font-bold text-gray-800 mb-5">
+
+        Upload Document
+
+      </h2>
+
+
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Document Title
+
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="title"
+            placeholder="Enter document title"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+        </div>
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Category
+
+          </label>
+
+          <select
+            [(ngModel)]="selectedCategoryId"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <option [ngValue]="0">
+              Select Category
+            </option>
+
+            @for (
+            category of categories;
+            track category.id
+            ) {
+
+            <option
+              [ngValue]="category.id">
+
+              {{ category.name }}
+
+            </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <div
+          class="md:col-span-2">
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Description
+
+          </label>
+
+          <textarea
+            [(ngModel)]="description"
+            rows="3"
+            placeholder="Enter document description"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </textarea>
+
+        </div>
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Select File
+
+          </label>
+
+          <input
+            type="file"
+            (change)="onFileSelected($event)"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+          />
+
+        </div>
+
+
+        <div
+          class="flex items-end">
+
+          <button
+            type="button"
+            (click)="uploadDocument()"
+            [disabled]="uploading"
+            class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50">
+
+            @if (uploading) {
+
+            Uploading...
+
+            } @else {
+
+            Upload Document
+
+            }
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Edit Document -->
+
+    @if (
+    editingDocument &&
+    canEditDocuments
+    ) {
+
+    <div
+      class="bg-white rounded-xl shadow p-6 mb-6">
+
+
+      <div
+        class="flex items-center justify-between mb-5">
+
+        <h2
+          class="text-xl font-bold text-gray-800">
+
+          Edit Document
+
+        </h2>
+
+
+        <button
+          type="button"
+          (click)="cancelEdit()"
+          class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600">
+
+          Cancel
+
+        </button>
+
+      </div>
+
+
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Document Title
+
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="editingDocument.title"
+            placeholder="Enter document title"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+        </div>
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Category
+
+          </label>
+
+          <select
+            [(ngModel)]="editingDocument.categoryId"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <option [ngValue]="0">
+              Select Category
+            </option>
+
+            @for (
+            category of categories;
+            track category.id
+            ) {
+
+            <option
+              [ngValue]="category.id">
+
+              {{ category.name }}
+
+            </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <div
+          class="md:col-span-2">
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Description
+
+          </label>
+
+          <textarea
+            [(ngModel)]="editingDocument.description"
+            rows="4"
+            placeholder="Enter document description"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </textarea>
+
+        </div>
+
+
+        <!-- Current File -->
+
+        <div
+          class="md:col-span-2">
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Current File
+
+          </label>
+
+          <div
+            class="bg-gray-100 rounded-lg px-4 py-3 text-gray-700">
+
+            {{ editingDocument.fileName }}
+
+          </div>
+
+        </div>
+
+
+        <!-- Replace File -->
+
+        <div
+          class="md:col-span-2">
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Replace File
+
+          </label>
+
+          <input
+            type="file"
+            (change)="onEditFileSelected($event)"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+          />
+
+          <p
+            class="text-sm text-gray-500 mt-2">
+
+            If you select a different file, DocuVault will automatically create the next version.
+
+          </p>
+
+
+          @if (editingFile) {
+
+          <p
+            class="text-sm text-blue-600 mt-2 font-medium">
+
+            New file selected:
+            {{ editingFile.name }}
+
+          </p>
+
+          }
+
+        </div>
+
+
+        <!-- Update Button -->
+
+        <div
+          class="flex items-end gap-3">
+
+          <button
+            type="button"
+            (click)="updateDocument()"
+            [disabled]="updating"
+            class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50">
+
+            @if (updating) {
+
+            Updating...
+
+            } @else {
+
+            Update Document
+
+            }
+
+          </button>
+
+
+          <button
+            type="button"
+            (click)="cancelEdit()"
+            [disabled]="updating"
+            class="bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-600 disabled:opacity-50">
+
+            Cancel
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    }
+
+
+    <!-- Search and Filters -->
+
+    <div
+      class="bg-white rounded-xl shadow p-6 mb-6">
+
+      <h2
+        class="text-xl font-bold text-gray-800 mb-5">
+
+        Search & Filter
+
+      </h2>
+
+
+      <div
+        class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Search Title
+
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            (input)="searchDocuments()"
+            placeholder="Search documents..."
+            class="w-full border border-gray-300 rounded-lg px-4 py-2"
+          />
+
+        </div>
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            File Type
+
+          </label>
+
+          <select
+            [(ngModel)]="selectedFileType"
+            (change)="searchDocuments()"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2">
+
+            <option value="">
+              All Types
+            </option>
+
+            <option value="pdf">
+              PDF
+            </option>
+
+            <option value="doc">
+              Word
+            </option>
+
+            <option value="docx">
+              DOCX
+            </option>
+
+            <option value="xls">
+              Excel
+            </option>
+
+            <option value="xlsx">
+              XLSX
+            </option>
+
+            <option value="txt">
+              Text
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div>
+
+          <label
+            class="block text-sm font-semibold text-gray-700 mb-2">
+
+            Category
+
+          </label>
+
+          <select
+            [(ngModel)]="filterCategoryId"
+            (change)="searchDocuments()"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2">
+
+            <option [ngValue]="0">
+              All Categories
+            </option>
+
+            @for (
+            category of categories;
+            track category.id
+            ) {
+
+            <option
+              [ngValue]="category.id">
+
+              {{ category.name }}
+
+            </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <div
+          class="flex items-end">
+
+          <button
+            type="button"
+            (click)="clearFilters()"
+            class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700">
+
+            Clear Filters
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- Documents -->
+
+    <div
+      class="bg-white rounded-xl shadow">
+
+
+      <div
+        class="p-6 border-b flex items-center justify-between">
+
+        <div>
+
+          <h2
+            class="text-xl font-bold text-gray-800">
+
+            Documents
+
+          </h2>
+
+          <p
+            class="text-gray-500 mt-1">
+
+            Total documents:
+            {{ filteredDocuments.length }}
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      @if (loading) {
+
+      <div
+        class="p-8 text-center text-gray-500">
+
+        Loading documents...
+
+      </div>
+
+      }
+
+      @else if (error) {
+
+      <div
+        class="p-8 text-center text-red-600">
+
+        {{ error }}
+
+      </div>
+
+      }
+
+      @else if (
+      filteredDocuments.length === 0
+      ) {
+
+      <div
+        class="p-8 text-center text-gray-500">
+
+        No documents found.
+
+      </div>
+
+      }
+
+      @else {
+
+      <div
+        class="overflow-x-auto">
+
+        <table
+          class="w-full">
+
+          <thead
+            class="bg-gray-50">
+
+          <tr>
+
+            <th
+              class="text-left px-6 py-4">
+
+              ID
+
+            </th>
+
+            <th
+              class="text-left px-6 py-4">
+
+              Title
+
+            </th>
+
+            <th
+              class="text-left px-6 py-4">
+
+              File
+
+            </th>
+
+            <th
+              class="text-left px-6 py-4">
+
+              Type
+
+            </th>
+
+            <th
+              class="text-left px-6 py-4">
+
+              Category
+
+            </th>
+
+            <th
+              class="text-left px-6 py-4">
+
+              Actions
+
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          @for (
+          document of filteredDocuments;
+          track document.id
+          ) {
+
+          <tr
+            class="border-t hover:bg-gray-50">
+
+
+            <td
+              class="px-6 py-4">
+
+              {{ document.id }}
+
+            </td>
+
+
+            <td
+              class="px-6 py-4">
+
+              <div
+                class="font-semibold text-gray-800">
+
+                {{ document.title }}
+
+              </div>
+
+              @if (
+              document.description
+              ) {
+
+              <div
+                class="text-sm text-gray-500 mt-1">
+
+                {{ document.description }}
+
+              </div>
+
+              }
+
+            </td>
+
+
+            <td
+              class="px-6 py-4">
+
+              {{ document.fileName }}
+
+            </td>
+
+
+            <td
+              class="px-6 py-4">
+
+                    <span
+                      class="bg-gray-100 px-3 py-1 rounded-full text-sm">
+
+                      {{ document.fileType }}
+
+                    </span>
+
+            </td>
+
+
+            <td
+              class="px-6 py-4">
+
+              @for (
+              category of categories;
+              track category.id
+              ) {
+
+              @if (
+              category.id ===
+              document.categoryId
+              ) {
+
+              <span
+                class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+
+                          {{ category.name }}
+
+                        </span>
+
+              }
+
+              }
+
+            </td>
+
+
+            <td
+              class="px-6 py-4">
+
+              <div
+                class="flex flex-wrap gap-2">
+
+
+                <button
+                  type="button"
+                  (click)="downloadDocument(document)"
+                  class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700">
+
+                  Download
+
+                </button>
+
+
+                <button
+                  type="button"
+                  (click)="viewVersions(document.id)"
+                  class="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700">
+
+                  Versions
+
+                </button>
+
+
+                @if (
+                canEditDocuments
+                ) {
+
+                <button
+                  type="button"
+                  (click)="startEdit(document)"
+                  class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700">
+
+                  Edit
+
+                </button>
+
+                }
+
+
+                @if (
+                canDeleteDocuments
+                ) {
+
+                <button
+                  type="button"
+                  (click)="deleteDocument(document.id)"
+                  class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700">
+
+                  Delete
+
+                </button>
+
+                }
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      }
+
+    </div>
+
+  </main>
+
+</div>

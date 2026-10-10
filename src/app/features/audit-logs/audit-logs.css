@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+button {
+  transition: all 0.2s ease;
+}
+
+input,
+textarea,
+select {
+  transition: all 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
